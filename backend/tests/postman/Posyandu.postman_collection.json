@@ -1,0 +1,2802 @@
+{
+  "info": {
+    "name": "API Sistem Informasi Posyandu",
+    "_postman_id": "posyandu-kelompok6",
+    "description": "Skenario sukses dan gagal per endpoint. Jalankan berurutan (Run collection) pada database baru dari db/01 s.d. 04, backend menyala di port 3000. Semua data uji dummy.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "0. Status & Auth",
+      "item": [
+        {
+          "name": "Status layanan: server dan basis data siap -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/status"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login: isian kosong -> 422 ERR-VAL-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"\",\n  \"password\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login: password salah -> 401 ERR-AUTH-02",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"kaderEndah02\",\n  \"password\": \"salah\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-02', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-02'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login: body JSON rusak -> 400 ERR-VAL-17",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\": \"kaderEndah02\", "
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 400', () => pm.response.to.have.status(400));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-17', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-17'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Koordinator -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"kaderNovita01\",\n  \"password\": \"Posyandu#2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('sesiKoordinator', json.data.id_sesi);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Kader -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"kaderEndah02\",\n  \"password\": \"Posyandu#2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('sesiKader', json.data.id_sesi);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "1. Balita (FSD-2.6 s.d. 2.11)",
+      "item": [
+        {
+          "name": "Tambah balita tanpa sesi -> 401 ERR-AUTH-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{baseUrl}}/balita",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah balita: NIK, No. KK, tanggal, kontak salah -> 422 ERR-VAL-04",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Uji Postman Balita\",\n  \"jenis_kelamin\": \"Perempuan\",\n  \"tanggal_lahir\": \"2999-01-01\",\n  \"berat_lahir\": 3.1,\n  \"panjang_lahir\": 48,\n  \"nama_orang_tua\": \"Ibu Uji\",\n  \"no_kk\": \"123\",\n  \"hubungan_keluarga\": \"Anak\",\n  \"alamat\": \"Jl. Uji 1\",\n  \"dusun\": \"Uji\",\n  \"rt\": \"01\",\n  \"rw\": \"01\",\n  \"desa\": \"Sukamaju\",\n  \"kecamatan\": \"Karanganyar\",\n  \"nik\": \"12\",\n  \"kontak\": \"08ab\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-04', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-04'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah balita (KK baru) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Uji Postman Balita\",\n  \"jenis_kelamin\": \"Perempuan\",\n  \"tanggal_lahir\": \"2025-01-10\",\n  \"berat_lahir\": 3.1,\n  \"panjang_lahir\": 48,\n  \"nama_orang_tua\": \"Ibu Uji\",\n  \"no_kk\": \"{{noKkBaru}}\",\n  \"hubungan_keluarga\": \"Anak\",\n  \"alamat\": \"Jl. Uji 1\",\n  \"dusun\": \"Uji\",\n  \"rt\": \"01\",\n  \"rw\": \"01\",\n  \"desa\": \"Sukamaju\",\n  \"kecamatan\": \"Karanganyar\",\n  \"nik\": \"{{nikBalita}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('nikBalita', '33' + Date.now().toString().slice(-10) + Math.floor(1000 + Math.random() * 8999));",
+                  "pm.collectionVariables.set('noKkBaru', '33' + Date.now().toString().slice(-10) + Math.floor(1000 + Math.random() * 8999));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idBalita', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah balita: NIK sudah terdaftar -> 409 ERR-VAL-05",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Uji Postman Balita\",\n  \"jenis_kelamin\": \"Perempuan\",\n  \"tanggal_lahir\": \"2025-01-10\",\n  \"berat_lahir\": 3.1,\n  \"panjang_lahir\": 48,\n  \"nama_orang_tua\": \"Ibu Uji\",\n  \"no_kk\": \"{{noKkBaru}}\",\n  \"hubungan_keluarga\": \"Anak\",\n  \"alamat\": \"Jl. Uji 1\",\n  \"dusun\": \"Uji\",\n  \"rt\": \"01\",\n  \"rw\": \"01\",\n  \"desa\": \"Sukamaju\",\n  \"kecamatan\": \"Karanganyar\",\n  \"nik\": \"{{nikBalita}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-05', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-05'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detail balita -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Detail balita: ID bukan UUID -> 404 ERR-DATA-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/bukan-uuid"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ubah balita: kontak -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"kontak\": \"081211112222\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ubah balita: nama dikosongkan -> 422 ERR-VAL-01",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ubah balita: NIK milik warga lain -> 409 ERR-VAL-05",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nik\": \"3313010000000101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-05', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-05'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan balita: berat 0 -> 422 ERR-VAL-02",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2026-10-01\",\n  \"berat_badan\": 0,\n  \"tinggi_panjang_badan\": 76,\n  \"lila\": 13,\n  \"lika\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-02', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-02'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan balita: tanggal sebelum lahir -> 422 ERR-VAL-11",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2000-01-01\",\n  \"berat_badan\": 9,\n  \"tinggi_panjang_badan\": 76,\n  \"lila\": 13,\n  \"lika\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-11', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-11'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan balita (hitung z-score) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2026-10-01\",\n  \"berat_badan\": 9,\n  \"tinggi_panjang_badan\": 76,\n  \"lila\": 13,\n  \"lika\": 45\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idPeriksaBalita', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Riwayat balita -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/riwayat"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Layanan balita: daftar kosong -> 422 ERR-VAL-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan/{{idPeriksaBalita}}/layanan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"layanan\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Layanan balita: Vitamin A -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan/{{idPeriksaBalita}}/layanan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"layanan\": [\n    {\n      \"jenis_layanan\": \"Vitamin A\",\n      \"tanggal_layanan\": \"2026-10-01\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Daftar faskes tujuan rujukan -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/faskes"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idFaskes', json.data[0].faskes_id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Isian pendukung: rujuk tanpa faskes -> 422 ERR-VAL-06",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan/{{idPeriksaBalita}}/isian-pendukung",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status_rujukan\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-06', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-06'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Isian pendukung: rujuk ke faskes -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan/{{idPeriksaBalita}}/isian-pendukung",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status_rujukan\": true,\n  \"faskes_id\": \"{{idFaskes}}\",\n  \"alasan_rujukan\": \"Uji rujukan\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Isian pendukung: Kader membatalkan rujukan -> 403 ERR-AUTH-03",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}/pemeriksaan/{{idPeriksaBalita}}/isian-pendukung",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"catatan_edukasi\": \"ubah\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-03'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Ibu (FSD-2.12 s.d. 2.18)",
+      "item": [
+        {
+          "name": "Tambah ibu hamil -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/ibu",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Uji Postman Ibu\",\n  \"tanggal_lahir\": \"1998-02-02\",\n  \"status_ibu\": \"Hamil\",\n  \"nama_suami\": \"Suami Uji\",\n  \"kehamilan_ke\": 1,\n  \"no_kk\": \"3302240101010002\",\n  \"hubungan_keluarga\": \"Famili Lain\",\n  \"nik\": \"{{nikIbu}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('nikIbu', '33' + Date.now().toString().slice(-10) + Math.floor(1000 + Math.random() * 8999));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idIbu', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan ibu hamil: usia kehamilan kosong -> 422 ERR-VAL-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/ibu/{{idIbu}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2026-10-01\",\n  \"berat_badan\": 55,\n  \"lila\": 23,\n  \"tekanan_darah_sistolik\": 110,\n  \"tekanan_darah_diastolik\": 70,\n  \"bb_sesuai_kurva_kia\": true,\n  \"td_sesuai_kurva_kia\": false,\n  \"hb\": 10.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan ibu (KEK dan anemia) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/ibu/{{idIbu}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2026-10-01\",\n  \"berat_badan\": 55,\n  \"lila\": 23,\n  \"tekanan_darah_sistolik\": 110,\n  \"tekanan_darah_diastolik\": 70,\n  \"usia_kehamilan_minggu\": 20,\n  \"bb_sesuai_kurva_kia\": true,\n  \"td_sesuai_kurva_kia\": false,\n  \"hb\": 10.5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idPeriksaIbu', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Layanan ibu: TTD dan MT -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/ibu/{{idIbu}}/pemeriksaan/{{idPeriksaIbu}}/layanan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"layanan\": [\n    {\n      \"jenis_layanan\": \"TTD\",\n      \"tanggal_layanan\": \"2026-10-01\",\n      \"jumlah_tablet\": 30,\n      \"konsumsi_harian\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Riwayat ibu -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/ibu/{{idIbu}}/riwayat"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Lansia (FSD-2.19 s.d. 2.24)",
+      "item": [
+        {
+          "name": "Tambah lansia -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"Uji Postman Lansia\",\n  \"jenis_kelamin\": \"Laki-laki\",\n  \"tanggal_lahir\": \"1955-03-03\",\n  \"status_perkawinan\": \"Kawin\",\n  \"no_kk\": \"3302240101010002\",\n  \"hubungan_keluarga\": \"Famili Lain\",\n  \"nik\": \"{{nikLansia}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('nikLansia', '33' + Date.now().toString().slice(-10) + Math.floor(1000 + Math.random() * 8999));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idLansia', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan lansia: merokok tanpa kuesioner PUMA -> 422 ERR-VAL-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia/{{idLansia}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2026-10-01\",\n  \"berat_badan\": 62,\n  \"tinggi_badan\": 165,\n  \"lingkar_perut\": 88,\n  \"tekanan_darah_sistolik\": 150,\n  \"tekanan_darah_diastolik\": 90,\n  \"gula_darah\": 180,\n  \"merokok\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pemeriksaan lansia (IMT dan skor PUMA) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia/{{idLansia}}/pemeriksaan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tanggal_periksa\": \"2026-10-01\",\n  \"berat_badan\": 62,\n  \"tinggi_badan\": 165,\n  \"lingkar_perut\": 88,\n  \"tekanan_darah_sistolik\": 150,\n  \"tekanan_darah_diastolik\": 90,\n  \"gula_darah\": 180,\n  \"merokok\": true,\n  \"rokok_per_hari\": 20,\n  \"lama_merokok_tahun\": 35,\n  \"puma_gejala_1\": true,\n  \"puma_gejala_2\": true,\n  \"puma_gejala_3\": false,\n  \"puma_gejala_4\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idPeriksaLansia', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Layanan lansia (tidak ada jalurnya) -> 404 ERR-SYS-03",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia/{{idLansia}}/pemeriksaan/{{idPeriksaLansia}}/layanan",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"layanan\": []\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-SYS-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-SYS-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Isian pendukung lansia (TBC) -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia/{{idLansia}}/pemeriksaan/{{idPeriksaLansia}}/isian-pendukung",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tbc_batuk\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Riwayat lansia -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia/{{idLansia}}/riwayat"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Cari, Rekap, Dashboard (FSD-2.25, 2.26, beranda)",
+      "item": [
+        {
+          "name": "Cari: kata kunci kosong -> 422 ERR-VAL-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/sasaran?nama="
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cari: nama tidak ada -> 404 ERR-DATA-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/sasaran?nama=zzzzzz"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cari: nama ada -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/sasaran?nama=Uji%20Postman"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rekap: bulan 13 -> 422 ERR-VAL-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/rekap?bulan=13&tahun=2026"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rekap: periode tanpa data (pesan ERR-DATA-04) -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/rekap?bulan=1&tahun=2000"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rekap: Oktober 2026 -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/rekap?bulan=10&tahun=2026"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dashboard beranda -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/dashboard"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Jadwal kegiatan (beranda)",
+      "item": [
+        {
+          "name": "Daftar jadwal mendatang -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah jadwal: jam selesai sebelum jam mulai -> 422 ERR-VAL-14",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kegiatan\": \"Posyandu Uji Postman\",\n  \"jenis_kegiatan\": \"Posyandu\",\n  \"tanggal_pelaksanaan\": \"2099-12-10\",\n  \"jam_mulai\": \"11:00\",\n  \"jam_selesai\": \"08:00\",\n  \"lokasi\": \"Balai RW 02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-14', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-14'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah jadwal: tanggal lampau -> 422 ERR-VAL-15",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kegiatan\": \"Posyandu Uji Postman\",\n  \"jenis_kegiatan\": \"Posyandu\",\n  \"tanggal_pelaksanaan\": \"2020-01-01\",\n  \"jam_mulai\": \"08:00\",\n  \"jam_selesai\": \"11:00\",\n  \"lokasi\": \"Balai RW 02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-15', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-15'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah jadwal -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama_kegiatan\": \"Posyandu Uji Postman\",\n  \"jenis_kegiatan\": \"Posyandu\",\n  \"tanggal_pelaksanaan\": \"2099-12-10\",\n  \"jam_mulai\": \"08:00\",\n  \"jam_selesai\": \"11:00\",\n  \"lokasi\": \"Balai RW 02\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idJadwal', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ubah jadwal -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal/{{idJadwal}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"lokasi\": \"Posyandu Melati\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hapus jadwal oleh Kader -> 403 ERR-AUTH-03",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal/{{idJadwal}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hapus jadwal oleh Koordinator -> 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal/{{idJadwal}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Hapus jadwal yang sudah dihapus -> 404 ERR-DATA-09",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal/{{idJadwal}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-09', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-09'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. RBAC dan Log Aktivitas (FSD-2.5)",
+      "item": [
+        {
+          "name": "Kader menghapus balita lewat API -> 403 ERR-AUTH-03",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kader membuka KPI monitoring -> 403 ERR-AUTH-03",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/monitoring/ringkasan"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "KPI monitoring hari ini -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/monitoring/ringkasan"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log: jenis tidak dikenal -> 422 ERR-VAL-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/monitoring/log?jenis=Salah"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log: rentang tanggal terbalik -> 422 ERR-VAL-14",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/monitoring/log?dari=2026-12-01&sampai=2026-11-01"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-14', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-14'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Log: percobaan akses ditolak -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/monitoring/log?jenis=Ditolak"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Akun (FSD-2.3, 2.4)",
+      "item": [
+        {
+          "name": "Ganti password: kurang dari 8 karakter -> 422 ERR-VAL-07",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun/saya/password",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password_baru\": \"abc\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-07', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-07'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kader membuka daftar akun -> 403 ERR-AUTH-03",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 403', () => pm.response.to.have.status(403));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Daftar akun -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idAkunSaya', json.data.find((a) => a.akun_saya).id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Kader terdaftar yang belum punya akun -> 200",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun/kader-tanpa-akun"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah akun: isian kosong -> 422 ERR-VAL-01",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sumber\": \"petugas_baru\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-VAL-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-VAL-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah akun petugas baru -> 201",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sumber\": \"petugas_baru\",\n  \"nama\": \"Ibu Uji Postman\",\n  \"jenis_kelamin\": \"Perempuan\",\n  \"jabatan_kader\": \"Kader\",\n  \"username\": \"{{usernameBaru}}\",\n  \"password_awal\": \"AwalUji#2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('usernameBaru', 'kaderPm' + Date.now().toString().slice(-6));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.collectionVariables.set('idAkunBaru', json.data.id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Tambah akun: username sudah dipakai -> 409 ERR-DATA-03",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sumber\": \"petugas_baru\",\n  \"nama\": \"Ibu Kembar\",\n  \"jenis_kelamin\": \"Perempuan\",\n  \"jabatan_kader\": \"Kader\",\n  \"username\": \"{{usernameBaru}}\",\n  \"password_awal\": \"AwalUji#2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 409', () => pm.response.to.have.status(409));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ubah peran akun sendiri -> 422 ERR-DATA-10",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun/{{idAkunSaya}}",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"peran\": \"User (Kader)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-10', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-10'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nonaktifkan akun sendiri -> 422 ERR-DATA-05",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun/{{idAkunSaya}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status_akun\": \"Nonaktif\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 422', () => pm.response.to.have.status(422));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-05', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-05'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nonaktifkan akun lain -> 200",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun/{{idAkunBaru}}/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status_akun\": \"Nonaktif\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ubah akun: ID bukan UUID -> 404 ERR-DATA-07",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/akun/bukan-uuid",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nama\": \"X\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-07', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-07'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Hapus dan logout",
+      "item": [
+        {
+          "name": "Koordinator menghapus lansia -> 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/lansia/{{idLansia}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Koordinator menghapus ibu -> 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/ibu/{{idIbu}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Koordinator menghapus balita -> 200",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Balita yang sudah dihapus -> 404 ERR-DATA-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKoordinator}}"
+              }
+            ],
+            "url": "{{baseUrl}}/balita/{{idBalita}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-DATA-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-DATA-01'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alamat API tidak terdaftar -> 404 ERR-SYS-03",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/tidak-ada"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 404', () => pm.response.to.have.status(404));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-SYS-03', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-SYS-03'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout Kader -> 200",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/auth/logout"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Memakai sesi yang sudah logout -> 401 ERR-AUTH-01",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-id-sesi",
+                "value": "{{sesiKader}}"
+              }
+            ],
+            "url": "{{baseUrl}}/jadwal"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.test('Status 401', () => pm.response.to.have.status(401));",
+                  "pm.test('Format respons {status, data, message, errors}', () => pm.expect(json).to.have.all.keys('status', 'data', 'message', 'errors'));",
+                  "pm.test('Kode ERR-AUTH-01', () => pm.expect(json.errors.map((e) => e.code)).to.include('ERR-AUTH-01'));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api/v1"
+    },
+    {
+      "key": "sesiKader",
+      "value": ""
+    },
+    {
+      "key": "sesiKoordinator",
+      "value": ""
+    },
+    {
+      "key": "nikBalita",
+      "value": ""
+    },
+    {
+      "key": "noKkBaru",
+      "value": ""
+    },
+    {
+      "key": "nikIbu",
+      "value": ""
+    },
+    {
+      "key": "nikLansia",
+      "value": ""
+    },
+    {
+      "key": "usernameBaru",
+      "value": ""
+    },
+    {
+      "key": "idBalita",
+      "value": ""
+    },
+    {
+      "key": "idPeriksaBalita",
+      "value": ""
+    },
+    {
+      "key": "idFaskes",
+      "value": ""
+    },
+    {
+      "key": "idIbu",
+      "value": ""
+    },
+    {
+      "key": "idPeriksaIbu",
+      "value": ""
+    },
+    {
+      "key": "idLansia",
+      "value": ""
+    },
+    {
+      "key": "idPeriksaLansia",
+      "value": ""
+    },
+    {
+      "key": "idJadwal",
+      "value": ""
+    },
+    {
+      "key": "idAkunSaya",
+      "value": ""
+    },
+    {
+      "key": "idAkunBaru",
+      "value": ""
+    }
+  ]
+}
