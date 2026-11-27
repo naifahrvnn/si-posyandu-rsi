@@ -119,7 +119,7 @@ CREATE SECURITY POLICY dbo.kebijakan_hapus_koordinator
     WITH (STATE = ON);
 GO
 
-/* ===================== Bagian D. RLS akun (FSD-2.3, FSD-2.4, BR-04, BR-05) =====================
+/* ===================== Bagian D. RLS akun =====================
    - pengguna: tambah akun hanya Super User; ubah hanya Super User atau pemilik akun itu sendiri
      (app_user_id = user_id), mis. Ganti Password dan pencatatan last_login saat login.
    - petugas dan kader: tambah/ubah hanya Super User (Tambah Akun dengan petugas baru, ubah nama akun).
@@ -158,7 +158,7 @@ CREATE SECURITY POLICY dbo.kebijakan_kelola_akun
 GO
 
 /* ===================== Bagian E. Penyesuaian database lama =====================
-   Jenis aktivitas 'Ditolak' (percobaan akses tanpa hak, ERR-AUTH-03) sudah ada di 01_schema.sql.
+   Jenis aktivitas 'Ditolak' ("percobaan akses tanpa hak") sudah ada di 01_schema.sql.
    Database yang dibuat sebelum versi ini disesuaikan di sini tanpa menghapus data. */
 IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
                 WHERE name = N'ck_log_jenis' AND definition LIKE N'%Ditolak%')
