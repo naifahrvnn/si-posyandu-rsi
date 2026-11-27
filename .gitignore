@@ -1,0 +1,35 @@
+# Dependensi (dipasang ulang dengan npm install)
+node_modules/
+
+# Hasil build
+dist/
+build/
+*.tsbuildinfo
+
+# Rahasia lingkungan: isi .env tidak boleh di-push (password basis data)
+.env
+.env.*
+!.env.example
+
+# Log dan laporan uji
+logs/
+*.log
+npm-debug.log*
+coverage/
+test-results/
+playwright-report/
+newman/
+
+# Editor dan sistem operasi
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Cadangan basis data lokal
+*.bak
+*.mdf
+*.ldf
