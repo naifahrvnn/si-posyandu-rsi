@@ -1,0 +1,40 @@
+{
+  "name": "posyandu-backend",
+  "version": "4.0.0",
+  "description": "Backend API Sistem Informasi Posyandu (Express, TypeScript, SQL Server, konsep OOP)",
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc",
+    "test": "tsx --test tests/unit/Domain.test.ts",
+    "test:api": "tsx tests/api.test.ts",
+    "oop": "tsx scripts/peta-oop.ts",
+    "arsitektur": "tsx scripts/cek-arsitektur.ts",
+    "format": "prettier --write \"src/**/*.ts\" \"scripts/*.ts\" \"tests/**/*.ts\"",
+    "format:cek": "prettier --check \"src/**/*.ts\" \"scripts/*.ts\" \"tests/**/*.ts\"",
+    "test:postman": "newman run tests/postman/Posyandu.postman_collection.json"
+  },
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "mssql": "^12.0.0",
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/mssql": "^12.3.0",
+    "@types/node": "^22.19.0",
+    "@types/swagger-ui-express": "^4.1.8",
+    "newman": "6.2.1",
+    "prettier": "3.8.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}
