@@ -1,11 +1,11 @@
 /* =====================================================================
-   04_seed.sql — data contoh (dummy) untuk pengujian, bukan data asli warga (SRS 2.4).
+   04_seed.sql — data contoh (dummy) untuk pengujian, bukan data asli warga.
    Jalankan sekali setelah 03_security.sql (berisi INSERT, tidak untuk dijalankan ulang).
 
    Bagian A. Data contoh kelompok: petugas, faskes, KK, warga, akun, pemeriksaan, layanan, jadwal.
    Bagian B. Contoh nilai ambang aturan_kategori (untuk uji, bukan standar resmi).
    Bagian C. Password uji: semua akun Koordinator/Kader menjadi Posyandu#2026.
-   Bagian D. Satu kader tanpa akun, untuk mencoba Tambah Akun dari kader terdaftar (FSD-2.4).
+   Bagian D. Satu kader tanpa akun, untuk mencoba Tambah Akun dari kader terdaftar.
    ===================================================================== */
 SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
@@ -39,7 +39,7 @@ INSERT INTO dbo.faskes (faskes_id, nama_faskes, jenis_faskes, alamat, mitra_bpjs
 ('D0000000-0000-0000-0000-000000000002',N'Klinik Pratama Rawat Jalan Soedirman','Klinik',N'Kecamatan Purwokerto Selatan',1),
 ('D0000000-0000-0000-0000-000000000003',N'Klinik Utama Rawat Inap Amanda','Klinik',N'Kecamatan Purwokerto Selatan',1);
 
-/* Ambang contoh — nilai resmi [PERLU KONFIRMASI] */
+/* Ambang contoh — nilai resmi */
 INSERT INTO dbo.ref_kategori_penghasilan VALUES
 (1, 0,          530000, 'Rendah'),
 (2, 1850000,    9000000, 'Menengah'),
@@ -215,7 +215,7 @@ INSERT INTO dbo.petugas_kegiatan (jadwal_id, petugas_id, peran_tugas) VALUES
 ('E0000000-0000-0000-0000-000000000006','A0000000-0000-0000-0000-000000000005','Pencatat');
 GO
 
-/* ===================== Bagian B. Contoh nilai ambang aturan_kategori (CONTOH UNTUK UJI, bukan standar resmi) =====================
+/* ===================== Bagian B. Contoh nilai ambang aturan_kategori (bukan standar resmi, untuk uji) =====================
    Kategori balita TB/U (stunting), BB/U, BB/PB-TB, dan lingkar kepala TIDAK memakai tabel ini:
    dihitung di backend dengan z-score WHO sesuai Permenkes No. 2 Tahun 2020 (StandarAntropometri.ts). */
 IF NOT EXISTS (SELECT 1 FROM dbo.aturan_kategori)
